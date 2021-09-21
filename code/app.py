@@ -13,5 +13,5 @@ api.add_resource(PublicationList, '/publications')
 def healthcheck():
     return 'OK', 201
 
-
-app.run(port=5000, debug=True)
+if __name__ == '__main__':
+    app.run(port=5000, debug=True)
