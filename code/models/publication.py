@@ -1,43 +1,28 @@
-import sqlite3
+from db import db
 
-class PublicationModel:
-    def __init__(self, title, id, content):
-        self.title = title
+class PublicationModel(db.Model):
+    __tablename__ = 'publications'
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(80))
+    content = db.Column(db.String(500))
+
+    def __init__(self, id, title, content):
         self.id = id
+        self.title = title
         self.content = content
 
     def json(self):
-        return {'title': self.title, 'id': self.id, 'content': self.content}
+        return {'id': self.id, 'title': self.title, 'content': self.content}
 
     @classmethod
     def find_by_title(cls, title):
-        connection = sqlite3.connect('data.db')
-        cursor = connection.cursor()
+        return cls.query.filter_by(title=title).first()
 
-        query = "SELECT * FROM publications WHERE title=?"
-        result = cursor.execute(query, (title,))
-        row = result.fetchone()
-        connection.close()
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
 
-        if row:
-            return cls(row[0], row[1], row[2])
-
-    def insert(self):
-        connection = sqlite3.connect('data.db')
-        cursor = connection.cursor()
-
-        query = "INSERT INTO publications VALUES (?, ?, ?)"
-        cursor.execute(query, (self.title, self.id, self.content))
-
-        connection.commit()
-        connection.close()
-
-    def update(self):
-        connection = sqlite3.connect('data.db')
-        cursor = connection.cursor()
-
-        query = "UPDATE publications SET id=?, content=? WHERE title=?"
-        cursor.execute(query, (self.title, self.id, self.content))
-
-        connection.commit()
-        connection.close()
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
