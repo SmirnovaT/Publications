@@ -1,6 +1,7 @@
 from flask_restful import Resource
 from models.publication import PublicationModel
 from parsers.publication_parser import publication_parser
+from parsers.rubric_parser import rubric_parser
 
 class Publication(Resource):
 
@@ -15,8 +16,9 @@ class Publication(Resource):
             return {'message': "An publication with title '{}' already exists".format(title)}, 400
 
         data = publication_parser.parse_args()
+        dat = rubric_parser.parse_args()
 
-        publication = PublicationModel(data['id'], title, data['content'])
+        publication = PublicationModel(data['id'], title, data['content'], dat['rubric_id'])
 
         try:
             publication.save_to_db()
@@ -34,11 +36,12 @@ class Publication(Resource):
 
     def put(self, title):
         data = publication_parser.parse_args()
+        dat = rubric_parser.parse_args()
 
         publication = PublicationModel.find_by_title(title)
 
         if publication is None:
-            publication = PublicationModel(data['id'], title, data['content'])
+            publication = PublicationModel(data['id'], title, data['content'], dat['rubric_id'])
         else:
             publication.id = data['id']
             publication.content = data['content']
