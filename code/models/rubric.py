@@ -8,12 +8,12 @@ class RubricModel(db.Model):
 
     publications = db.relationship('PublicationModel', lazy='dynamic')
 
-    def __init__(self, id, name):
-        self.id = id
+    def __init__(self, name, rubric_id):
         self.name = name
+        self.rubric_id = rubric_id
 
     def json(self):
-        return {'id': self.id, 'name': self.name, 'publications': [publication.json() for publication in self.publications.all()]}
+        return {'name': self.name, 'publications': [publication.json() for publication in self.publications.all()]}
 
     @classmethod
     def find_by_name(cls, name):
