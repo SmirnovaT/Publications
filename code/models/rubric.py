@@ -1,5 +1,6 @@
 from db import db
 
+
 class RubricModel(db.Model):
     __tablename__ = 'rubrics'
 
