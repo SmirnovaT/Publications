@@ -1,5 +1,6 @@
 from db import db
 
+
 class PublicationModel(db.Model):
     __tablename__ = 'publications'
 

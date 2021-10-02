@@ -1,10 +1,12 @@
 from flask_restful import Resource
 from models.publication import PublicationModel
+from flask_jwt import jwt_required
 from parsers.publication_parser import publication_parser
 from parsers.rubric_parser import rubric_parser
 
-class Publication(Resource):
 
+class Publication(Resource):
+    @jwt_required()
     def get(self, title):
         pulication = PublicationModel.find_by_title(title)
         if pulication:

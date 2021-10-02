@@ -2,8 +2,8 @@ from flask_restful import Resource
 from models.rubric import RubricModel
 from parsers.rubric_parser import rubric_parser
 
-class Rubric(Resource):
 
+class Rubric(Resource):
     def get(self, name):
         rubric = RubricModel.find_by_name(name)
         if rubric:
