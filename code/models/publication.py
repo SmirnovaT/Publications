@@ -17,7 +17,7 @@ class PublicationModel(db.Model):
         self.rubric_id = rubric_id
 
     def json(self):
-        return {'id': self.id, 'title': self.title, 'content': self.content}
+        return {'id': self.id, 'title': self.title, 'content': self.content, 'rubric_id': self.rubric_id}
 
     @classmethod
     def find_by_title(cls, title):

@@ -12,10 +12,12 @@ api = Api(app)
 def create_tables():
     db.create_all()
 
+
 api.add_resource(Rubric, '/rubric/<string:name>')
 api.add_resource(Publication, '/publication/<string:title>')
 api.add_resource(PublicationList, '/publications')
 api.add_resource(RubricList, '/rubrics')
+
 
 @app.route('/healthcheck')
 def healthcheck():
