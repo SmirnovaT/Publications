@@ -1,8 +1,8 @@
 from flask_restful import reqparse
 
 rubric_parser = reqparse.RequestParser()
-rubric_parser.add_argument('rubric_id',
-                        type=int,
+rubric_parser.add_argument('name',
+                        type=str,
                         required=True,
-                        help="Every publication needs a rubric id."
+                        help="This field cannot be left blank."
                         )
