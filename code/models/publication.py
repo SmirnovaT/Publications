@@ -11,8 +11,7 @@ class PublicationModel(db.Model):
     rubric_id = db.Column(db.Integer, db.ForeignKey('rubrics.id'))
     rubric = db.relationship('RubricModel')
 
-    def __init__(self, id, title, content, rubric_id):
-        self.id = id
+    def __init__(self, title, content, rubric_id):
         self.title = title
         self.content = content
         self.rubric_id = rubric_id
@@ -21,8 +20,8 @@ class PublicationModel(db.Model):
         return {'id': self.id, 'title': self.title, 'content': self.content, 'rubric_id': self.rubric_id}
 
     @classmethod
-    def find_by_title(cls, title):
-        return cls.query.filter_by(title=title).first()
+    def find_by_id(cls, _id):
+        return cls.query.filter_by(id=_id).first()
 
     def save_to_db(self):
         db.session.add(self)

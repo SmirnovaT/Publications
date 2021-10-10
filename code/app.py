@@ -21,8 +21,8 @@ def create_tables():
     db.create_all()
 
 
-api.add_resource(Rubric, '/rubric/<string:name>')
-api.add_resource(Publication, '/publication/<string:title>')
+api.add_resource(Rubric, '/rubric/<id>')
+api.add_resource(Publication, '/publication/<id>')
 api.add_resource(PublicationList, '/publications')
 api.add_resource(RubricList, '/rubrics')
 api.add_resource(UserRegister, '/register')
