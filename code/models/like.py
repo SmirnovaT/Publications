@@ -19,6 +19,10 @@ class LikeModel(db.Model):
     def json(self):
         return {'id': self.id, 'user_id': self.user_id, 'publication_id': self.publication_id}
 
+    @classmethod
+    def find_by_id(cls, _id):
+        return cls.query.filter_by(id=_id).first()
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
