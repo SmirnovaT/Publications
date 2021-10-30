@@ -9,16 +9,15 @@ class RubricModel(db.Model):
 
     publications = db.relationship('PublicationModel', lazy='dynamic')
 
-    def __init__(self, name, rubric_id):
+    def __init__(self, name):
         self.name = name
-        self.rubric_id = rubric_id
 
     def json(self):
-        return {'name': self.name, 'publications': [publication.json() for publication in self.publications.all()]}
+        return {'rubric_id': self.id, 'name': self.name, 'publications': [publication.json() for publication in self.publications.all()]}
 
     @classmethod
-    def find_by_name(cls, name):
-        return cls.query.filter_by(name=name).first()
+    def find_by_id(cls, _id):
+        return cls.query.filter_by(id=_id).first()
 
     def save_to_db(self):
         db.session.add(self)

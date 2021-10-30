@@ -1,0 +1,176 @@
+[1mdiff --git a/code/app.py b/code/app.py[m
+[1mindex ac48190..d9995e2 100644[m
+[1m--- a/code/app.py[m
+[1m+++ b/code/app.py[m
+[36m@@ -1,13 +1,21 @@[m
+ from flask import Flask[m
+ from flask_restful import Api[m
+[32m+[m[32mfrom flask_jwt import JWT[m
+[32m+[m
+ from resources.publication import Publication, PublicationList[m
+ from resources.rubric import Rubric, RubricList[m
+[32m+[m[32mfrom resources.user import UserRegister[m
+[32m+[m[32mfrom security import authenticate, identity[m
+ [m
+ app = Flask(__name__)[m
+ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'[m
+ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False[m
+[32m+[m[32mapp.config['PROPAGATE_EXCEPTIONS'] = True[m
+[32m+[m[32mapp.secret_key = 'tanya'[m
+ api = Api(app)[m
+ [m
+[32m+[m[32mjwt = JWT(app, authenticate, identity)[m
+[32m+[m
+ @app.before_first_request[m
+ def create_tables():[m
+     db.create_all()[m
+[36m@@ -17,6 +25,7 @@[m [mapi.add_resource(Rubric, '/rubric/<string:name>')[m
+ api.add_resource(Publication, '/publication/<string:title>')[m
+ api.add_resource(PublicationList, '/publications')[m
+ api.add_resource(RubricList, '/rubrics')[m
+[32m+[m[32mapi.add_resource(UserRegister, '/register')[m
+ [m
+ [m
+ @app.route('/healthcheck')[m
+[1mdiff --git a/code/models/publication.py b/code/models/publication.py[m
+[1mindex fb416f9..b4958c4 100644[m
+[1m--- a/code/models/publication.py[m
+[1m+++ b/code/models/publication.py[m
+[36m@@ -1,5 +1,6 @@[m
+ from db import db[m
+ [m
+[32m+[m
+ class PublicationModel(db.Model):[m
+     __tablename__ = 'publications'[m
+ [m
+[1mdiff --git a/code/models/rubric.py b/code/models/rubric.py[m
+[1mindex 87b7866..48f05f8 100644[m
+[1m--- a/code/models/rubric.py[m
+[1m+++ b/code/models/rubric.py[m
+[36m@@ -1,5 +1,6 @@[m
+ from db import db[m
+ [m
+[32m+[m
+ class RubricModel(db.Model):[m
+     __tablename__ = 'rubrics'[m
+ [m
+[1mdiff --git a/code/models/user.py b/code/models/user.py[m
+[1mindex e69de29..0819238 100644[m
+[1m--- a/code/models/user.py[m
+[1m+++ b/code/models/user.py[m
+[36m@@ -0,0 +1,26 @@[m
+[32m+[m[32mfrom db import db[m
+[32m+[m
+[32m+[m
+[32m+[m[32mclass UserModel(db.Model):[m
+[32m+[m[32m    __tablename__ = 'users'[m
+[32m+[m
+[32m+[m[32m    id = db.Column(db.Integer, primary_key=True)[m
+[32m+[m[32m    username = db.Column(db.String(80))[m
+[32m+[m[32m    password = db.Column(db.String(80))[m
+[32m+[m
+[32m+[m[32m    def __init__(self, username, password):[m
+[32m+[m[32m        self.username = username[m
+[32m+[m[32m        self.password = password[m
+[32m+[m
+[32m+[m[32m    def save_to_db(self):[m
+[32m+[m[32m        db.session.add(self)[m
+[32m+[m[32m        db.session.commit()[m
+[32m+[m
+[32m+[m[32m    @classmethod[m
+[32m+[m[32m    def find_by_username(cls, username):[m
+[32m+[m[32m        return cls.query.filter_by(username=username).first()[m
+[32m+[m
+[32m+[m[32m    @classmethod[m
+[32m+[m[32m    def find_by_id(cls, _id):[m
+[32m+[m[32m        return cls.query.filter_by(id=_id).first()[m
+[32m+[m
+[1mdiff --git a/code/parsers/user_parser.py b/code/parsers/user_parser.py[m
+[1mindex e69de29..35de623 100644[m
+[1m--- a/code/parsers/user_parser.py[m
+[1m+++ b/code/parsers/user_parser.py[m
+[36m@@ -0,0 +1,13 @@[m
+[32m+[m[32mfrom flask_restful import reqparse[m
+[32m+[m
+[32m+[m[32muser_parser = reqparse.RequestParser()[m
+[32m+[m[32muser_parser.add_argument('username',[m
+[32m+[m[32m        type=str,[m
+[32m+[m[32m        required=True,[m
+[32m+[m[32m        help="This field cannot be left blank!"[m
+[32m+[m[32m        )[m
+[32m+[m[32muser_parser.add_argument('password',[m
+[32m+[m[32m        type=str,[m
+[32m+[m[32m        required=True,[m
+[32m+[m[32m        help="This field cannot be left blank!"[m
+[32m+[m[32m                        )[m
+\ No newline at end of file[m
+[1mdiff --git a/code/resources/publication.py b/code/resources/publication.py[m
+[1mindex c958d94..1f014bc 100644[m
+[1m--- a/code/resources/publication.py[m
+[1m+++ b/code/resources/publication.py[m
+[36m@@ -1,10 +1,12 @@[m
+ from flask_restful import Resource[m
+ from models.publication import PublicationModel[m
+[32m+[m[32mfrom flask_jwt import jwt_required[m
+ from parsers.publication_parser import publication_parser[m
+ from parsers.rubric_parser import rubric_parser[m
+ [m
+[31m-class Publication(Resource):[m
+ [m
+[32m+[m[32mclass Publication(Resource):[m
+[32m+[m[32m    @jwt_required()[m
+     def get(self, title):[m
+         pulication = PublicationModel.find_by_title(title)[m
+         if pulication:[m
+[1mdiff --git a/code/resources/rubric.py b/code/resources/rubric.py[m
+[1mindex 971d150..b931150 100644[m
+[1m--- a/code/resources/rubric.py[m
+[1m+++ b/code/resources/rubric.py[m
+[36m@@ -2,8 +2,8 @@[m [mfrom flask_restful import Resource[m
+ from models.rubric import RubricModel[m
+ from parsers.rubric_parser import rubric_parser[m
+ [m
+[31m-class Rubric(Resource):[m
+ [m
+[32m+[m[32mclass Rubric(Resource):[m
+     def get(self, name):[m
+         rubric = RubricModel.find_by_name(name)[m
+         if rubric:[m
+[1mdiff --git a/code/resources/user.py b/code/resources/user.py[m
+[1mindex e69de29..1c6e80e 100644[m
+[1m--- a/code/resources/user.py[m
+[1m+++ b/code/resources/user.py[m
+[36m@@ -0,0 +1,16 @@[m
+[32m+[m[32mfrom flask_restful import Resource[m
+[32m+[m[32mfrom models.user import UserModel[m
+[32m+[m[32mfrom parsers.user_parser import user_parser[m
+[32m+[m
+[32m+[m
+[32m+[m[32mclass UserRegister(Resource):[m
+[32m+[m[32m    def post(self):[m
+[32m+[m[32m       data = user_parser.parse_args()[m
+[32m+[m
+[32m+[m[32m       if UserModel.find_by_username(data['username']):[m
+[32m+[m[32m           return {"message": "A user with that username already exists"}, 400[m
+[32m+[m
+[32m+[m[32m       user = UserModel(data['username'], data['password'])[m
+[32m+[m[32m       user.save_to_db()[m
+[32m+[m
+[32m+[m[32m       return {"message": "User created successfully."}, 201[m
+[1mdiff --git a/code/security.py b/code/security.py[m
+[1mindex e69de29..ed259ae 100644[m
+[1m--- a/code/security.py[m
+[1m+++ b/code/security.py[m
+[36m@@ -0,0 +1,11 @@[m
+[32m+[m[32mfrom models.user import UserModel[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef authenticate(username, password):[m
+[32m+[m[32m    user = UserModel.find_by_username(username)[m
+[32m+[m[32m    if user and user.password == password:[m
+[32m+[m[32m        return user[m
+[32m+[m
+[32m+[m[32mdef identity(payload):[m
+[32m+[m[32m    user_id = payload['identity'][m
+[32m+[m[32m    return UserModel.find_by_id(user_id)[m
+\ No newline at end of file[m
