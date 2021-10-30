@@ -9,7 +9,8 @@ class PublicationModel(db.Model):
     content = db.Column(db.String(500))
 
     rubric_id = db.Column(db.Integer, db.ForeignKey('rubrics.id'))
-    rubric = db.relationship('RubricModel')
+    rubrics = db.relationship('RubricModel')
+    like = db.relationship('LikeModel', lazy='dynamic')
 
     def __init__(self, title, content, rubric_id):
         self.title = title

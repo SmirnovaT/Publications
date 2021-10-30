@@ -6,6 +6,7 @@ from resources.publication import Publication, PublicationList
 from resources.rubric import Rubric, RubricList
 from resources.user import UserRegister
 from security import authenticate, identity
+from resources.like import Like
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
@@ -26,6 +27,9 @@ api.add_resource(Publication, '/publication/<id>')
 api.add_resource(PublicationList, '/publications')
 api.add_resource(RubricList, '/rubrics')
 api.add_resource(UserRegister, '/register')
+api.add_resource(Like, '/like/<id>')
+
+
 
 
 @app.route('/healthcheck')
