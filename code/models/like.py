@@ -24,6 +24,10 @@ class LikeModel(db.Model):
         return cls.query.filter_by(id=_id).first()
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 =======
 
 >>>>>>> Stashed changes
