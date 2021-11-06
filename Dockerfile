@@ -1,15 +1,12 @@
-FROM python 3.9
+FROM python:3.9
 
 WORKDIR /app
 
-COPY requirements.txt
+COPY requirements.txt .
 
-RUN python -m pip install
+RUN python -m pip install --upgrade pip
+RUN python -m pip install -r requirements.txt
 
 COPY . .
 
-ENV PORT 5000
-
-EXPOSE $PORT
-
-CMD ["python", "app.py"]
+CMD ["python", "./code/app.py"]
