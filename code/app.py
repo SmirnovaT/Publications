@@ -1,6 +1,8 @@
 from flask import Flask
 from flask_restful import Api
 from flask_jwt import JWT
+from flask_migrate import Migrate
+from db import db
 
 from resources.publication import Publication, PublicationList
 from resources.rubric import Rubric, RubricList
@@ -9,11 +11,13 @@ from security import authenticate, identity
 from resources.like import Like
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@publ_db:5432/postgres'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PROPAGATE_EXCEPTIONS'] = True
 app.secret_key = 'tanya'
 api = Api(app)
+
+migrate = Migrate(app, db)
 
 jwt = JWT(app, authenticate, identity)
 

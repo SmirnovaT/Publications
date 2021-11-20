@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  publ_db:
+    image: postgres:13.4-alpine
+    restart: unless-stopped
+    container_name: publications.postgres
+    env_file:
+      - code/.envs/dev.env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
+
+  publ_api:
+    image: api
+    container_name: publications.api
+    user: 1000:1000 # for linux to delete created files
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - code/.envs/dev.env
+#    volumes:
+#      - .:/publications
+    ports:
+      - "5000:5000"
+    depends_on:
+      - publ_db
+
+volumes:
+  postgres-data:
